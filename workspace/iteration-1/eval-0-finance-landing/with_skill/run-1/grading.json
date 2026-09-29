@@ -1,0 +1,50 @@
+{
+  "expectations": [
+    {
+      "text": "Defines at least 8 CSS custom properties on :root (tokens defined once)",
+      "passed": true,
+      "evidence": "45 vars on :root"
+    },
+    {
+      "text": "Uses at most 3 raw hex/rgb color literals outside the :root block",
+      "passed": true,
+      "evidence": "2 literals outside :root: ['#FFA726', 'rgba(255,255,255,0.4)']"
+    },
+    {
+      "text": "Contains no lorem ipsum or 'Feature 1'-style placeholder copy",
+      "passed": true,
+      "evidence": "none found"
+    },
+    {
+      "text": "Base body font-size is 14px or larger",
+      "passed": true,
+      "evidence": "body {\n    margin: 0;\n    background: var(--surface-primary);\n    color: var(--foreground-primary);\n    font-family: var(--font-body);\n    font-size: 16px"
+    },
+    {
+      "text": "Declares a font-family stack or loads a webfont (Google Fonts link or @font-face)",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Uses a layered box-shadow (2+ layers) wherever a shadow is declared, or declares no shadows",
+      "passed": true,
+      "evidence": "3 shadow decls; single-layer: []"
+    },
+    {
+      "text": "Hero section has exactly one primary call-to-action button",
+      "passed": true,
+      "evidence": "1 primary CTAs in hero region"
+    },
+    {
+      "text": "Page has at least 4 distinct sections with alternating visual treatment (at least one inverse/dark section)",
+      "passed": true,
+      "evidence": "6 sections, inverse/dark class present: True"
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 0,
+    "total": 8,
+    "pass_rate": 1.0
+  }
+}

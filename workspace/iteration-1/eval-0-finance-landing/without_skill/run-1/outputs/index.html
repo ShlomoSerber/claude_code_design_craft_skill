@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledgerly — Know where your money goes</title>
+<meta name="description" content="Ledgerly automatically categorizes your spending and shows you exactly where your money goes each month. No spreadsheets, no manual tagging.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F6F2EA;
+    --paper-2: #EFE9DE;
+    --paper-3: #E6DFD1;
+    --ink: #17150F;
+    --ink-2: #4A463D;
+    --ink-3: #7C776B;
+    --line: rgba(23, 21, 15, 0.10);
+    --line-strong: rgba(23, 21, 15, 0.18);
+    --moss: #1F5C45;
+    --moss-2: #2E7A5C;
+    --moss-soft: #DCE8DF;
+    --amber: #C9822B;
+    --amber-soft: #F3E3C7;
+    --clay: #B5563E;
+    --clay-soft: #F0D9CF;
+    --slate: #4E6B8A;
+    --slate-soft: #D9E1EA;
+    --plum: #6B4E7A;
+    --plum-soft: #E4DAE8;
+    --card: #FFFDF9;
+    --shadow: 0 1px 2px rgba(23,21,15,.04), 0 12px 32px -12px rgba(23,21,15,.18), 0 40px 80px -40px rgba(23,21,15,.25);
+    --radius: 18px;
+    --serif: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+  ::selection { background: var(--moss); color: var(--paper); }
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; max-width: 100%; }
+  button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+
+  /* Grain overlay */
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+    opacity: .045; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .container { width: min(1180px, 100% - 48px); margin-inline: auto; }
+  @media (max-width: 640px) { .container { width: min(1180px, 100% - 32px); } }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--moss); display: inline-flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::before { content: ""; width: 20px; height: 1px; background: var(--moss); }
+
+  h1, h2, h3 { font-family: var(--serif); font-weight: 400; letter-spacing: -0.015em; line-height: 1.05; }
+  h1 { font-size: clamp(44px, 6.4vw, 84px); font-variation-settings: "opsz" 144; }
+  h2 { font-size: clamp(34px, 4.4vw, 56px); font-variation-settings: "opsz" 144; }
+  h3 { font-size: 24px; line-height: 1.2; }
+  h1 em, h2 em { font-style: italic; font-weight: 300; color: var(--moss); }
+
+  .lead { font-size: 19px; color: var(--ink-2); line-height: 1.6; max-width: 54ch; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 22px; border-radius: 999px; font-weight: 500; font-size: 15px;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--ink); color: var(--paper); box-shadow: 0 1px 0 rgba(255,255,255,.15) inset, 0 8px 20px -10px rgba(23,21,15,.6); }
+  .btn-primary:hover { transform: translateY(-1px); background: #000; box-shadow: 0 12px 26px -10px rgba(23,21,15,.7); }
+  .btn-primary svg { transition: transform .2s ease; }
+  .btn-primary:hover svg { transform: translateX(3px); }
+  .btn-ghost { color: var(--ink); border: 1px solid var(--line-strong); background: transparent; }
+  .btn-ghost:hover { background: rgba(23,21,15,.04); }
+
+  /* ---------- NAV ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    background: color-mix(in srgb, var(--paper) 78%, transparent);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-size: 22px; letter-spacing: -.01em; }
+  .logo-mark {
+    width: 30px; height: 30px; border-radius: 9px; background: var(--ink); position: relative; overflow: hidden;
+  }
+  .logo-mark::before { content: ""; position: absolute; left: 7px; top: 7px; width: 16px; height: 3px; background: var(--paper); border-radius: 2px; }
+  .logo-mark::after { content: ""; position: absolute; left: 7px; top: 13px; width: 10px; height: 3px; background: var(--amber); border-radius: 2px; box-shadow: 0 6px 0 var(--moss-2); }
+  .nav-links { display: flex; gap: 32px; font-size: 14.5px; color: var(--ink-2); }
+  .nav-links a { transition: color .15s; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta { display: flex; align-items: center; gap: 18px; font-size: 14.5px; }
+  .nav-cta .btn { padding: 10px 18px; font-size: 14px; }
+  @media (max-width: 860px) { .nav-links, .nav-cta a:not(.btn) { display: none; } }
+
+  /* ---------- HERO ---------- */
+  .hero { position: relative; padding: 88px 0 40px; }
+  .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
+  .hero-copy { display: flex; flex-direction: column; gap: 28px; }
+  .hero-copy h1 { max-width: 12ch; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .hero-note { font-size: 13.5px; color: var(--ink-3); display: flex; align-items: center; gap: 8px; }
+  .hero-note svg { color: var(--moss); }
+
+  /* Ambient shape behind mock */
+  .hero-visual { position: relative; }
+  .hero-visual::before {
+    content: ""; position: absolute; inset: -10% -6% -14% -6%; z-index: 0;
+    background:
+      radial-gradient(60% 60% at 30% 20%, rgba(31,92,69,.16), transparent 70%),
+      radial-gradient(50% 50% at 80% 90%, rgba(201,130,43,.18), transparent 70%);
+    filter: blur(20px);
+    border-radius: 40px;
+  }
+
+  /* App mock */
+  .mock {
+    position: relative; z-index: 1;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 22px; box-shadow: var(--shadow); overflow: hidden;
+    transform: rotate(-1deg);
+    animation: floatIn 1s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes floatIn { from { opacity: 0; transform: translateY(24px) rotate(-1deg); } to { opacity: 1; transform: translateY(0) rotate(-1deg); } }
+  .mock-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px; border-bottom: 1px solid var(--line);
+  }
+  .mock-month { font-family: var(--serif); font-size: 20px; }
+  .mock-month span { color: var(--ink-3); font-style: italic; font-weight: 300; }
+  .mock-pill { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; padding: 5px 10px; border-radius: 999px; background: var(--moss-soft); color: var(--moss); }
+  .mock-body { padding: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .mock-total-label { font-size: 12px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em; font-family: var(--mono); }
+  .mock-total { font-family: var(--serif); font-size: 44px; line-height: 1; margin-top: 8px; letter-spacing: -.02em; font-variation-settings: "opsz" 144; }
+  .mock-total small { font-size: 22px; color: var(--ink-3); }
+  .mock-delta { margin-top: 10px; font-size: 13px; color: var(--moss); display: inline-flex; align-items: center; gap: 6px; }
+  .ring {
+    --a: 34; --b: 22; --c: 18; --d: 14; --e: 12;
+    width: 150px; height: 150px; border-radius: 50%; position: relative; margin-left: auto;
+    background: conic-gradient(
+      var(--moss) 0 calc(var(--a) * 1%),
+      var(--amber) 0 calc((var(--a) + var(--b)) * 1%),
+      var(--slate) 0 calc((var(--a) + var(--b) + var(--c)) * 1%),
+      var(--clay) 0 calc((var(--a) + var(--b) + var(--c) + var(--d)) * 1%),
+      var(--plum) 0 100%
+    );
+    -webkit-mask: radial-gradient(circle, transparent 54%, #000 55%);
+            mask: radial-gradient(circle, transparent 54%, #000 55%);
+  }
+  .ring-wrap { position: relative; width: 150px; margin-left: auto; }
+  .ring-center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font-size: 11px; color: var(--ink-3); line-height: 1.3; }
+  .ring-center strong { display: block; font-family: var(--serif); font-size: 22px; color: var(--ink); font-weight: 400; }
+  .cats { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+  .cat { display: grid; grid-template-columns: 120px 1fr 70px; align-items: center; gap: 12px; font-size: 13.5px; }
+  .cat-name { display: flex; align-items: center; gap: 8px; color: var(--ink-2); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .bar { height: 6px; background: var(--paper-2); border-radius: 999px; overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 999px; width: 0; animation: grow 1.2s cubic-bezier(.2,.8,.2,1) forwards; }
+  .cat:nth-child(1) .bar i { animation-delay: .3s; } .cat:nth-child(2) .bar i { animation-delay: .4s; }
+  .cat:nth-child(3) .bar i { animation-delay: .5s; } .cat:nth-child(4) .bar i { animation-delay: .6s; }
+  .cat:nth-child(5) .bar i { animation-delay: .7s; }
+  @keyframes grow { to { width: var(--w); } }
+  .cat-amt { font-family: var(--mono); font-size: 12.5px; text-align: right; color: var(--ink); }
+
+  /* Floating transaction chip */
+  .chip {
+    position: absolute; z-index: 2;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 12px 14px; box-shadow: var(--shadow);
+    display: flex; align-items: center; gap: 12px; font-size: 13px;
+    animation: chipIn 1s cubic-bezier(.2,.8,.2,1) 0.9s both;
+  }
+  @keyframes chipIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+  .chip-1 { right: -26px; top: 42px; }
+  .chip-2 { left: -34px; bottom: 34px; animation-delay: 1.2s; }
+  .chip-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-family: var(--serif); font-size: 16px; }
+  .chip-meta { display: flex; flex-direction: column; gap: 2px; }
+  .chip-meta strong { font-weight: 500; }
+  .chip-meta span { color: var(--ink-3); font-size: 12px; }
+  .chip-tag { margin-left: 6px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em; padding: 4px 8px; border-radius: 6px; }
+
+  @media (max-width: 960px) {
+    .hero { padding-top: 56px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+    .hero-visual { margin-top: 8px; }
+    .chip-1 { right: 6px; top: -16px; } .chip-2 { left: 6px; bottom: -16px; }
+  }
+  @media (max-width: 560px) {
+    .mock-body { grid-template-columns: 1fr; }
+    .ring-wrap { margin-left: 0; }
+    .cat { grid-template-columns: 96px 1fr 64px; }
+  }
+
+  /* ---------- MARQUEE / PROOF ---------- */
+  .proof { padding: 56px 0 24px; }
+  .proof-row { display: flex; align-items: center; gap: 40px; justify-content: space-between; flex-wrap: wrap; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 26px 0; }
+  .proof-label { font-size: 13px; color: var(--ink-3); }
+  .banks { display: flex; gap: 34px; flex-wrap: wrap; align-items: center; }
+  .bank { font-family: var(--serif); font-size: 18px; color: var(--ink-3); letter-spacing: -.01em; opacity: .85; display: flex; align-items: center; gap: 8px; }
+  .bank::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .5; }
+
+  /* ---------- SECTIONS ---------- */
+  section { padding: 104px 0; }
+  .section-head { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: end; margin-bottom: 56px; }
+  .section-head h2 { max-width: 16ch; }
+  .section-head p { color: var(--ink-2); font-size: 17px; max-width: 46ch; }
+  @media (max-width: 860px) { .section-head { grid-template-columns: 1fr; gap: 20px; } }
+
+  /* Feature bento */
+  .bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px; }
+  .cardx {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 30px; display: flex; flex-direction: column; gap: 18px; position: relative; overflow: hidden;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .cardx:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+  .cardx h3 { max-width: 20ch; }
+  .cardx p { color: var(--ink-2); font-size: 15px; max-width: 42ch; }
+  .cardx .viz { margin-top: auto; }
+  .span-7 { grid-column: span 7; } .span-5 { grid-column: span 5; } .span-4 { grid-column: span 4; } .span-8 { grid-column: span 8; }
+  @media (max-width: 900px) { .span-7, .span-5, .span-4, .span-8 { grid-column: span 12; } }
+
+  /* viz: auto-categorize list */
+  .txn-list { display: flex; flex-direction: column; gap: 8px; }
+  .txn { display: grid; grid-template-columns: 1fr auto auto; gap: 14px; align-items: center; padding: 11px 14px; border-radius: 12px; background: var(--paper); border: 1px solid var(--line); font-size: 13.5px; }
+  .txn .m { font-family: var(--mono); font-size: 12.5px; }
+  .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .05em; padding: 4px 9px; border-radius: 6px; text-transform: uppercase; }
+  .t-moss { background: var(--moss-soft); color: var(--moss); }
+  .t-amber { background: var(--amber-soft); color: #8A5619; }
+  .t-slate { background: var(--slate-soft); color: #33506E; }
+  .t-clay { background: var(--clay-soft); color: #8E3F2C; }
+  .t-plum { background: var(--plum-soft); color: #4F3A5C; }
+  .txn:nth-child(2) { animation: slideIn .6s ease .2s both; } .txn:nth-child(3) { animation: slideIn .6s ease .4s both; }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-8px); } }
+
+  /* viz: monthly columns */
+  .cols { display: flex; align-items: flex-end; gap: 10px; height: 130px; padding-top: 10px; }
+  .col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+  .col b { width: 100%; border-radius: 6px 6px 3px 3px; background: var(--paper-3); position: relative; overflow: hidden; }
+  .col b::after { content: ""; position: absolute; inset: auto 0 0 0; height: 46%; background: var(--moss); border-radius: 0 0 3px 3px; }
+  .col.active b { background: var(--amber-soft); }
+  .col.active b::after { background: var(--amber); height: 62%; }
+  .col span { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); letter-spacing: .04em; }
+
+  /* viz: insight quote */
+  .insight { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .insight p { color: rgba(246,242,234,.72); }
+  .insight h3 { color: var(--paper); }
+  .insight-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 18px; font-size: 14px; line-height: 1.5; display: flex; gap: 12px; align-items: flex-start; }
+  .insight-card .ic { width: 26px; height: 26px; border-radius: 50%; background: var(--amber); flex-shrink: 0; display: grid; place-items: center; color: var(--ink); font-size: 13px; font-weight: 600; }
+  .insight-card b { color: var(--paper); font-weight: 500; }
+
+  /* viz: rules */
+  .rule { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12.5px; padding: 12px 14px; border-radius: 12px; background: var(--paper); border: 1px dashed var(--line-strong); color: var(--ink-2); }
+  .rule .arrow { color: var(--ink-3); }
+  .rule .kw { color: var(--moss); }
+
+  /* ---------- HOW IT WORKS ---------- */
+  .how { background: var(--paper-2); border-block: 1px solid var(--line); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--line-strong); border-radius: var(--radius); overflow: hidden; background: var(--card); }
+  .step { padding: 36px 32px; position: relative; }
+  .step + .step { border-left: 1px solid var(--line); }
+  .step-num { font-family: var(--serif); font-size: 64px; line-height: 1; color: var(--paper-3); font-weight: 300; font-style: italic; margin-bottom: 20px; }
+  .step h3 { margin-bottom: 10px; }
+  .step p { color: var(--ink-2); font-size: 15px; }
+  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } .step + .step { border-left: 0; border-top: 1px solid var(--line); } }
+
+  /* ---------- STATS ---------- */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 56px; }
+  .stat { padding: 8px 0 0; border-top: 1px solid var(--line-strong); }
+  .stat strong { font-family: var(--serif); font-size: 44px; font-weight: 300; display: block; letter-spacing: -.02em; line-height: 1.1; margin: 14px 0 6px; }
+  .stat span { font-size: 14px; color: var(--ink-3); }
+  @media (max-width: 860px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ---------- TESTIMONIAL ---------- */
+  .quote-wrap { display: grid; grid-template-columns: 1fr; place-items: center; text-align: center; }
+  blockquote { font-family: var(--serif); font-size: clamp(26px, 3.4vw, 40px); line-height: 1.25; max-width: 24ch; font-weight: 300; letter-spacing: -.01em; }
+  blockquote em { font-style: italic; color: var(--moss); }
+  .quote-who { margin-top: 28px; display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--ink-2); }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--amber), var(--clay)); }
+  .quote-who span { color: var(--ink-3); }
+
+  /* ---------- PRICING ---------- */
+  .pricing { background: var(--ink); color: var(--paper); }
+  .pricing .eyebrow { color: var(--amber); } .pricing .eyebrow::before { background: var(--amber); }
+  .pricing h2 em { color: var(--amber); }
+  .pricing .section-head p { color: rgba(246,242,234,.7); }
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 900px; }
+  .plan { border: 1px solid rgba(255,255,255,.14); border-radius: var(--radius); padding: 34px; display: flex; flex-direction: column; gap: 22px; background: rgba(255,255,255,.03); }
+  .plan.featured { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+  .plan-name { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: rgba(246,242,234,.6); }
+  .plan.featured .plan-name { color: var(--ink-3); }
+  .price { font-family: var(--serif); font-size: 56px; line-height: 1; font-weight: 300; letter-spacing: -.02em; }
+  .price small { font-family: var(--sans); font-size: 14px; color: rgba(246,242,234,.6); margin-left: 6px; letter-spacing: 0; }
+  .plan.featured .price small { color: var(--ink-3); }
+  .plan ul { list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 14.5px; color: rgba(246,242,234,.82); }
+  .plan.featured ul { color: var(--ink-2); }
+  .plan li { display: flex; gap: 10px; align-items: flex-start; }
+  .plan li::before { content: ""; width: 16px; height: 16px; flex-shrink: 0; margin-top: 3px; border-radius: 50%; background: var(--moss-2); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='8'/%3E%3Cpath d='M4.5 8.2l2.3 2.3 4.7-4.8' stroke='%23000' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='8'/%3E%3Cpath d='M4.5 8.2l2.3 2.3 4.7-4.8' stroke='%23000' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+  .plan .btn { justify-content: center; margin-top: auto; }
+  .plan:not(.featured) .btn-ghost { color: var(--paper); border-color: rgba(255,255,255,.22); }
+  .plan:not(.featured) .btn-ghost:hover { background: rgba(255,255,255,.06); }
+  .plan.featured .btn-primary { background: var(--ink); color: var(--paper); }
+  @media (max-width: 760px) { .plans { grid-template-columns: 1fr; } }
+
+  /* ---------- CTA ---------- */
+  .cta { text-align: center; padding: 120px 0; position: relative; overflow: hidden; }
+  .cta::before {
+    content: ""; position: absolute; left: 50%; top: 50%; width: 900px; height: 900px; transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(31,92,69,.12), transparent 60%); pointer-events: none;
+  }
+  .cta .container { position: relative; display: flex; flex-direction: column; align-items: center; gap: 26px; }
+  .cta h2 { max-width: 18ch; font-size: clamp(38px, 5.4vw, 68px); }
+  .cta p { color: var(--ink-2); font-size: 17px; max-width: 44ch; }
+
+  /* ---------- FOOTER ---------- */
+  footer { border-top: 1px solid var(--line); padding: 44px 0 36px; font-size: 13.5px; color: var(--ink-3); }
+  .foot { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .foot-links { display: flex; gap: 22px; }
+  .foot-links a:hover { color: var(--ink); }
+
+  /* Reveal on scroll */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1; transform: none; }
+    .bar i { width: var(--w); }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="#" class="logo" aria-label="Ledgerly home">
+      <span class="logo-mark" aria-hidden="true"></span>
+      Ledgerly
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#">Security</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="#">Sign in</a>
+      <a href="#pricing" class="btn btn-primary">Start free</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">Personal finance, done for you</span>
+      <h1>Know where your money <em>actually</em> goes.</h1>
+      <p class="lead">Ledgerly connects to your accounts, categorizes every transaction automatically, and shows you a clear picture of each month. No spreadsheets. No manual tagging. No guilt trips.</p>
+      <div class="hero-actions">
+        <a href="#pricing" class="btn btn-primary">
+          Start for free
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+        <a href="#how" class="btn btn-ghost">See how it works</a>
+      </div>
+      <p class="hero-note">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>
+        Bank-grade encryption. Read-only access. Cancel anytime.
+      </p>
+    </div>
+
+    <div class="hero-visual">
+      <div class="chip chip-1" aria-hidden="true">
+        <div class="chip-icon t-amber">B</div>
+        <div class="chip-meta"><strong>Blue Bottle Coffee</strong><span>Today, 8:14 AM · $6.75</span></div>
+        <span class="chip-tag t-amber">Dining</span>
+      </div>
+      <div class="chip chip-2" aria-hidden="true">
+        <div class="chip-icon t-slate">P</div>
+        <div class="chip-meta"><strong>PG&amp;E</strong><span>Yesterday · $142.10</span></div>
+        <span class="chip-tag t-slate">Utilities</span>
+      </div>
+
+      <div class="mock" role="img" aria-label="Ledgerly monthly overview showing total spending broken down by category">
+        <div class="mock-head">
+          <div class="mock-month">September <span>2026</span></div>
+          <div class="mock-pill">Auto-categorized · 214 txns</div>
+        </div>
+        <div class="mock-body">
+          <div>
+            <div class="mock-total-label">Spent this month</div>
+            <div class="mock-total">$3,842<small>.19</small></div>
+            <div class="mock-delta">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8l4-4 4 4"/></svg>
+              8% under your usual
+            </div>
+          </div>
+          <div class="ring-wrap">
+            <div class="ring"></div>
+            <div class="ring-center"><strong>5</strong>categories</div>
+          </div>
+          <div class="cats">
+            <div class="cat"><div class="cat-name"><i class="dot" style="background:var(--moss)"></i>Housing</div><div class="bar"><i style="--w:100%;background:var(--moss)"></i></div><div class="cat-amt">$1,650.00</div></div>
+            <div class="cat"><div class="cat-name"><i class="dot" style="background:var(--amber)"></i>Dining</div><div class="bar"><i style="--w:38%;background:var(--amber)"></i></div><div class="cat-amt">$612.40</div></div>
+            <div class="cat"><div class="cat-name"><i class="dot" style="background:var(--slate)"></i>Utilities</div><div class="bar"><i style="--w:27%;background:var(--slate)"></i></div><div class="cat-amt">$438.90</div></div>
+            <div class="cat"><div class="cat-name"><i class="dot" style="background:var(--clay)"></i>Transport</div><div class="bar"><i style="--w:22%;background:var(--clay)"></i></div><div class="cat-amt">$361.15</div></div>
+            <div class="cat"><div class="cat-name"><i class="dot" style="background:var(--plum)"></i>Everything else</div><div class="bar"><i style="--w:18%;background:var(--plum)"></i></div><div class="cat-amt">$302.74</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF -->
+<div class="proof">
+  <div class="container">
+    <div class="proof-row">
+      <div class="proof-label">Connects securely with 12,000+ institutions</div>
+      <div class="banks">
+        <span class="bank">Chase</span>
+        <span class="bank">Wells Fargo</span>
+        <span class="bank">Capital One</span>
+        <span class="bank">Amex</span>
+        <span class="bank">Schwab</span>
+        <span class="bank">Ally</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <span class="eyebrow">What Ledgerly does</span>
+        <h2 style="margin-top:16px">The work of budgeting, <em>without the work.</em></h2>
+      </div>
+      <p>Most money apps hand you a pile of transactions and a blank spreadsheet. Ledgerly does the sorting, the math, and the noticing, so all that's left for you is the understanding.</p>
+    </div>
+
+    <div class="bento">
+      <div class="cardx span-7 reveal">
+        <span class="eyebrow">Auto-categorization</span>
+        <h3>Every transaction sorted the moment it lands.</h3>
+        <p>Ledgerly reads merchant names, amounts, and patterns from your own history to file each purchase correctly. Correct one, and it learns for next time.</p>
+        <div class="viz txn-list" aria-hidden="true">
+          <div class="txn"><span>Trader Joe's #552</span><span class="m">-$84.32</span><span class="tag t-moss">Groceries</span></div>
+          <div class="txn"><span>Lyft *Ride 09-14</span><span class="m">-$18.90</span><span class="tag t-clay">Transport</span></div>
+          <div class="txn"><span>Spotify Premium</span><span class="m">-$11.99</span><span class="tag t-plum">Subscriptions</span></div>
+        </div>
+      </div>
+
+      <div class="cardx span-5 reveal">
+        <span class="eyebrow">Monthly view</span>
+        <h3>See the shape of each month.</h3>
+        <p>One clean picture of where the money went, and how this month compares to the last six.</p>
+        <div class="viz cols" aria-hidden="true">
+          <div class="col"><b style="height:58%"></b><span>APR</span></div>
+          <div class="col"><b style="height:70%"></b><span>MAY</span></div>
+          <div class="col"><b style="height:64%"></b><span>JUN</span></div>
+          <div class="col"><b style="height:82%"></b><span>JUL</span></div>
+          <div class="col"><b style="height:66%"></b><span>AUG</span></div>
+          <div class="col active"><b style="height:60%"></b><span>SEP</span></div>
+        </div>
+      </div>
+
+      <div class="cardx span-4 reveal">
+        <span class="eyebrow">Your rules</span>
+        <h3>Nudge it when you disagree.</h3>
+        <p>Set a rule once and Ledgerly applies it to everything past and future.</p>
+        <div class="viz rule" aria-hidden="true">
+          <span class="kw">if</span> merchant ~ "Costco" <span class="arrow">→</span> Groceries
+        </div>
+      </div>
+
+      <div class="cardx span-8 insight reveal">
+        <span class="eyebrow" style="color:var(--amber)">Quiet insights</span>
+        <h3>It notices what you'd rather not have to.</h3>
+        <p>Not alerts that nag. Observations that arrive when they're actually useful, written like a friend who's good with money.</p>
+        <div class="viz insight-card">
+          <div class="ic">!</div>
+          <div><b>Dining is up 31% this month.</b> Mostly weekday lunches near the office. That's about $190 more than your July average.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="how">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <span class="eyebrow">How it works</span>
+        <h2 style="margin-top:16px">Three minutes to set up. <em>Zero</em> minutes a week.</h2>
+      </div>
+      <p>Once your accounts are connected, Ledgerly keeps itself up to date. You just open it when you're curious.</p>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Connect your accounts</h3>
+        <p>Link checking, credit, and savings with read-only access. We never see your login and can never move money.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Ledgerly sorts everything</h3>
+        <p>Your last 24 months are categorized in seconds. New transactions get filed as they arrive.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Open it when you're curious</h3>
+        <p>A monthly picture that's always current. Tap any category to see exactly what's inside it.</p>
+      </div>
+    </div>
+    <div class="stats reveal">
+      <div class="stat"><strong>97.4%</strong><span>categorization accuracy, before any corrections</span></div>
+      <div class="stat"><strong>24 mo</strong><span>of history sorted on day one</span></div>
+      <div class="stat"><strong>$214</strong><span>average monthly savings found in the first 90 days</span></div>
+      <div class="stat"><strong>0</strong><span>spreadsheets required</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section>
+  <div class="container quote-wrap reveal">
+    <blockquote>"I've tried every budgeting app. This is the first one I still open <em>six months later</em>, because it doesn't ask me to do anything."</blockquote>
+    <div class="quote-who">
+      <div class="avatar" aria-hidden="true"></div>
+      <div>Priya Raman <span>· Product designer, Oakland</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="pricing">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <span class="eyebrow">Pricing</span>
+        <h2 style="margin-top:16px">Simple, like the <em>rest of it.</em></h2>
+      </div>
+      <p>Try everything free for 30 days. No card required. If it's not earning its keep, it'll tell you.</p>
+    </div>
+    <div class="plans reveal">
+      <div class="plan">
+        <div class="plan-name">Personal</div>
+        <div class="price">$0<small>forever</small></div>
+        <ul>
+          <li>Up to 2 connected accounts</li>
+          <li>Automatic categorization</li>
+          <li>Monthly overview and history</li>
+          <li>Custom rules</li>
+        </ul>
+        <a href="#" class="btn btn-ghost">Get started</a>
+      </div>
+      <div class="plan featured">
+        <div class="plan-name">Plus</div>
+        <div class="price">$6<small>per month, billed yearly</small></div>
+        <ul>
+          <li>Unlimited accounts, including joint</li>
+          <li>Quiet insights and trend detection</li>
+          <li>Subscription and price-hike tracking</li>
+          <li>Shared view for partners</li>
+          <li>Export to CSV, Sheets, or your accountant</li>
+        </ul>
+        <a href="#" class="btn btn-primary">Start 30-day trial</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="container reveal">
+    <span class="eyebrow">Get started</span>
+    <h2>Your next month, <em>clearly.</em></h2>
+    <p>Connect an account and see your last two years sorted before you finish your coffee.</p>
+    <a href="#pricing" class="btn btn-primary">
+      Start for free
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container foot">
+    <a href="#" class="logo" style="font-size:18px"><span class="logo-mark" style="width:24px;height:24px;border-radius:7px" aria-hidden="true"></span>Ledgerly</a>
+    <div class="foot-links">
+      <a href="#">Privacy</a>
+      <a href="#">Security</a>
+      <a href="#">Terms</a>
+      <a href="#">Contact</a>
+    </div>
+    <div>© 2026 Ledgerly, Inc. Made carefully in Portland.</div>
+  </div>
+</footer>
+
+<script>
+  // Reveal on scroll
+  (function () {
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(function (e) { io.observe(e); });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shipments – Northline Logistics Admin</title>
+<style>
+  :root {
+    --sidebar-bg: #0f172a;
+    --sidebar-text: #94a3b8;
+    --sidebar-text-active: #ffffff;
+    --sidebar-active-bg: #1e293b;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --bg: #f1f5f9;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --green: #16a34a;  --green-bg: #dcfce7;
+    --amber: #d97706;  --amber-bg: #fef3c7;
+    --red: #dc2626;    --red-bg: #fee2e2;
+    --blue: #2563eb;   --blue-bg: #dbeafe;
+    --gray: #475569;   --gray-bg: #e2e8f0;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .brand-logo {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 15px;
+  }
+
+  .brand-name { color: #fff; font-weight: 600; font-size: 15px; line-height: 1.1; }
+  .brand-sub  { font-size: 11px; color: var(--sidebar-text); margin-top: 2px; }
+
+  .nav { padding: 16px 12px; flex: 1; overflow-y: auto; }
+
+  .nav-section {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    padding: 12px 12px 6px;
+  }
+
+  .nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 2px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav a:hover { background: rgba(255,255,255,0.05); color: #e2e8f0; }
+  .nav a.active { background: var(--sidebar-active-bg); color: var(--sidebar-text-active); }
+  .nav a svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #334155; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+  }
+  .user-name { color: #fff; font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--sidebar-text); }
+
+  /* ---------- Main ---------- */
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .breadcrumb { color: var(--text-muted); font-size: 13px; }
+  .breadcrumb span { color: var(--text); font-weight: 500; }
+  .topbar-actions { display: flex; align-items: center; gap: 12px; }
+  .icon-btn {
+    width: 34px; height: 34px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-muted); position: relative;
+  }
+  .icon-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .icon-btn .dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; background: var(--red); border-radius: 50%; border: 1.5px solid #fff; }
+
+  .content { padding: 28px 32px 40px; }
+
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+  .page-header p  { color: var(--text-muted); margin-top: 4px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn:hover { background: #f8fafc; }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+  /* ---------- KPIs ---------- */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+  }
+  .kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .kpi-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .kpi-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .kpi-icon svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .kpi-value { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+  .kpi-delta { margin-top: 8px; font-size: 12px; color: var(--text-muted); }
+  .kpi-delta b { font-weight: 600; }
+  .up   { color: var(--green); }
+  .down { color: var(--red); }
+
+  /* ---------- Filter bar ---------- */
+  .filters {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: none;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .search {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 0 12px; height: 36px; flex: 1; min-width: 220px; max-width: 340px;
+    background: #fff;
+  }
+  .search svg { width: 15px; height: 15px; stroke: var(--text-muted); fill: none; stroke-width: 2; }
+  .search input { border: none; outline: none; font-size: 13px; width: 100%; background: transparent; color: var(--text); }
+  .search input::placeholder { color: #94a3b8; }
+
+  select.filter {
+    height: 36px; padding: 0 32px 0 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: #fff; color: var(--text);
+    font-size: 13px; font-family: inherit; cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
+  .filter-spacer { flex: 1; }
+  .link-btn { background: none; border: none; color: var(--accent); font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .link-btn:hover { text-decoration: underline; }
+
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; padding-top: 4px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent-soft); color: #1e40af;
+    font-size: 12px; font-weight: 500; padding: 4px 8px 4px 10px; border-radius: 999px;
+  }
+  .chip span { cursor: pointer; opacity: 0.7; font-size: 14px; line-height: 1; }
+
+  /* ---------- Table ---------- */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  thead th.sortable { cursor: pointer; }
+  thead th.sortable::after { content: " ↕"; opacity: 0.4; }
+  thead th.sorted::after { content: " ↓"; opacity: 1; color: var(--accent); }
+  tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: #f8fafc; }
+  td.id a { color: var(--accent); font-weight: 600; text-decoration: none; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+  td.id a:hover { text-decoration: underline; }
+  .loc { font-weight: 500; }
+  .loc small { display: block; color: var(--text-muted); font-weight: 400; font-size: 12px; margin-top: 2px; }
+  .carrier { display: flex; align-items: center; gap: 8px; }
+  .carrier-mark {
+    width: 24px; height: 24px; border-radius: 6px;
+    font-size: 10px; font-weight: 700; color: #fff;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .eta { white-space: nowrap; }
+  .eta small { display: block; color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+  .eta.late small { color: var(--red); }
+
+  .status {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; white-space: nowrap;
+  }
+  .status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .s-transit   { background: var(--blue-bg);  color: var(--blue); }
+  .s-delivered { background: var(--green-bg); color: var(--green); }
+  .s-delayed   { background: var(--red-bg);   color: var(--red); }
+  .s-pending   { background: var(--amber-bg); color: var(--amber); }
+  .s-customs   { background: var(--gray-bg);  color: var(--gray); }
+
+  td.actions { text-align: right; }
+  .kebab { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 18px; line-height: 1; padding: 4px 8px; border-radius: 6px; }
+  .kebab:hover { background: var(--gray-bg); color: var(--text); }
+
+  input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
+
+  .pagination {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--text-muted);
+    background: #fff;
+  }
+  .pages { display: flex; gap: 4px; }
+  .pages button {
+    min-width: 32px; height: 32px; padding: 0 8px; border-radius: 6px;
+    border: 1px solid var(--border); background: #fff; color: var(--text);
+    font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+  .pages button:hover { background: #f8fafc; }
+  .pages button.current { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .pages button:disabled { opacity: 0.4; cursor: default; }
+
+  @media (max-width: 1100px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 800px) {
+    .sidebar { display: none; }
+    .content { padding: 20px 16px; }
+    .table-wrap { overflow-x: auto; }
+    table { min-width: 900px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ================= Sidebar ================= -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">N</div>
+      <div>
+        <div class="brand-name">Northline</div>
+        <div class="brand-sub">Logistics Admin</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">Operations</div>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="active">
+        <svg viewBox="0 0 24 24"><path d="M21 8V21H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+        Shipments
+        <span class="nav-badge">128</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Carriers
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Routes
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-6 9 6v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        Warehouses
+      </a>
+
+      <div class="nav-section">Business</div>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Customers
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+        Invoices
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+        Reports
+      </a>
+
+      <div class="nav-section">System</div>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">AF</div>
+      <div>
+        <div class="user-name">Aaron Feldman</div>
+        <div class="user-role">Operations Manager</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= Main ================= -->
+  <div class="main">
+    <header class="topbar">
+      <div class="breadcrumb">Operations &nbsp;/&nbsp; <span>Shipments</span></div>
+      <div class="topbar-actions">
+        <button class="icon-btn" title="Notifications">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="dot"></span>
+        </button>
+        <button class="icon-btn" title="Help">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-header">
+        <div>
+          <h1>Shipments</h1>
+          <p>Track and manage all active and completed shipments. Last synced 2 minutes ago.</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+            Export CSV
+          </button>
+          <button class="btn btn-primary">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            New Shipment
+          </button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <section class="kpis">
+        <div class="kpi">
+          <div class="kpi-top">
+            <span class="kpi-label">Active Shipments</span>
+            <div class="kpi-icon" style="background:var(--blue-bg); color:var(--blue);">
+              <svg viewBox="0 0 24 24"><path d="M21 8V21H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value">1,284</div>
+          <div class="kpi-delta"><b class="up">▲ 8.2%</b> vs. last week</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top">
+            <span class="kpi-label">In Transit</span>
+            <div class="kpi-icon" style="background:var(--amber-bg); color:var(--amber);">
+              <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value">742</div>
+          <div class="kpi-delta"><b class="up">▲ 3.1%</b> vs. last week</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top">
+            <span class="kpi-label">Delayed</span>
+            <div class="kpi-icon" style="background:var(--red-bg); color:var(--red);">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value">37</div>
+          <div class="kpi-delta"><b class="down">▲ 12.4%</b> vs. last week</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top">
+            <span class="kpi-label">On-Time Delivery</span>
+            <div class="kpi-icon" style="background:var(--green-bg); color:var(--green);">
+              <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value">94.6%</div>
+          <div class="kpi-delta"><b class="up">▲ 1.3 pts</b> vs. last week</div>
+        </div>
+      </section>
+
+      <!-- Filter bar -->
+      <section class="filters">
+        <div class="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search by shipment ID, customer, or reference…">
+        </div>
+        <select class="filter">
+          <option>Status: All</option>
+          <option>In Transit</option>
+          <option>Delivered</option>
+          <option>Delayed</option>
+          <option>Pending Pickup</option>
+          <option>Customs Hold</option>
+        </select>
+        <select class="filter">
+          <option>Carrier: All</option>
+          <option>DHL Express</option>
+          <option>FedEx</option>
+          <option>Maersk</option>
+          <option>UPS</option>
+          <option>DB Schenker</option>
+        </select>
+        <select class="filter">
+          <option>Origin: Any</option>
+          <option>Rotterdam, NL</option>
+          <option>Shanghai, CN</option>
+          <option>Los Angeles, US</option>
+        </select>
+        <select class="filter">
+          <option>ETA: Next 7 days</option>
+          <option>Today</option>
+          <option>Next 30 days</option>
+          <option>Overdue</option>
+          <option>Custom range…</option>
+        </select>
+        <div class="filter-spacer"></div>
+        <button class="link-btn">Clear filters</button>
+        <div class="chips">
+          <span class="chip">ETA: Next 7 days <span>×</span></span>
+          <span class="chip">Priority: High <span>×</span></span>
+        </div>
+      </section>
+
+      <!-- Table -->
+      <section class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px;"><input type="checkbox" aria-label="Select all"></th>
+              <th class="sortable">Shipment ID</th>
+              <th class="sortable">Origin</th>
+              <th class="sortable">Destination</th>
+              <th class="sortable">Carrier</th>
+              <th class="sortable">Status</th>
+              <th class="sortable sorted">ETA</th>
+              <th style="width:48px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="id"><a href="#">SHP-240912-0041</a></td>
+              <td class="loc">Rotterdam, NL<small>Port of Rotterdam, Terminal 4</small></td>
+              <td class="loc">Chicago, US<small>DC Midwest-02</small></td>
+              <td><div class="carrier"><span class="carrier-mark" style="background:#1d4ed8;">MA</span>Maersk</div></td>
+              <td><span class="status s-transit">In Transit</span></td>
+              <td class="eta">Sep 18, 2026<small>in 2 days</small></td>
+              <td class="actions"><button class="kebab">⋯</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="id"><a href="#">SHP-240911-0287</a></td>
+              <td class="loc">Shanghai, CN<small>Yangshan Deep-Water Port</small></td>
+              <td class="loc">Los Angeles, US<small>DC West-01</small></td>
+              <td><div class="carrier"><span class="carrier-mark" style="background:#b91c1c;">DH</span>DHL Express</div></td>
+              <td><span class="status s-customs">Customs Hold</span></td>
+              <td class="eta">Sep 21, 2026<small>in 5 days</small></td>
+              <td class="actions"><button class="kebab">⋯</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="id"><a href="#">SHP-240910-0193</a></td>
+              <td class="loc">Hamburg, DE<small>HHLA Burchardkai</small></td>
+              <td class="loc">Madrid, ES<small>Customer: Ibérica Retail</small></td>
+              <td><div class="carrier"><span class="carrier-mark" style="background:#dc2626;">DB</span>DB Schenker</div></td>
+              <td><span class="status s-delayed">Delayed</span></td>
+              <td class="eta late">Sep 15, 2026<small>1 day overdue</small></td>
+              <td class="actions"><button class="kebab">⋯</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="id"><a href="#">SHP-240910-0158</a></td>
+              <td class="loc">Memphis, US<small>Hub MEM-North</small></td>
+              <td class="loc">Toronto, CA<small>DC Ontario-03</small></td>
+              <td><div class="carrier"><span class="carrier-mark" style="background:#7c3aed;">FX</span>FedEx</div></td>
+              <td><span class="status s-delivered">Delivered</span></td>
+              <td class="eta">Sep 16, 2026<small>delivered 09:42</small></td>
+              <td class="actions"><button class="kebab">⋯</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="id"><a href="#">SHP-240909-0322</a></td>
+              <td class="loc">Singapore, SG<small>PSA Pasir Panjang</small></td>
+              <td class="loc">Sydney, AU<small>DC Sydney-01</small></td>
+              <td><div class="carrier"><span class="carrier-mark" style="background:#1d4ed8;">MA</span>Maersk</div></td>
+              <td><span class="status s-transit">In Transit</span></td>
+              <td class="eta">Sep 23, 2026<small>in 7 days</small></td>
+              <td class="actions"><button class="kebab">⋯</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="id"><a href="#">SHP-240909-0301</a></td>
+              <td class="loc">Monterrey, MX<small>Plant MTY-2</small></td>
+              <td class="loc">Dallas, US<small>DC South-04</small></td>
+              <td><div class="carrier"><span class="carrier-mark" style="background:#92400e;">UP</span>UPS</div></td>
+              <td><span class="status s-pending">Pending Pickup</span></td>
+              <td class="eta">Sep 19, 2026<small>in 3 days</small></td>
+              <td class="actions"><button class="kebab">⋯</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="id"><a href="#">SHP-240908-0077</a></td>
+              <td class="loc">Antwerp, BE<small>Deurganckdok</small></td>
+              <td class="loc">New York, US<small>DC East-01</small></td>
+              <td><div class="carrier"><span class="carrier-mark" style="background:#1d4ed8;">MA</span>Maersk</div></td>
+              <td><span class="status s-delayed">Delayed</span></td>
+              <td class="eta late">Sep 14, 2026<small>2 days overdue</small></td>
+              <td class="actions"><button class="kebab">⋯</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="id"><a href="#">SHP-240908-0064</a></td>
+              <td class="loc">Frankfurt, DE<small>FRA CargoCity South</small></td>
+              <td class="loc">Dubai, AE<small>Customer: Gulf Medical</small></td>
+              <td><div class="carrier"><span class="carrier-mark" style="background:#b91c1c;">DH</span>DHL Express</div></td>
+              <td><span class="status s-transit">In Transit</span></td>
+              <td class="eta">Sep 17, 2026<small>tomorrow</small></td>
+              <td class="actions"><button class="kebab">⋯</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="id"><a href="#">SHP-240907-0219</a></td>
+              <td class="loc">Los Angeles, US<small>DC West-01</small></td>
+              <td class="loc">Seattle, US<small>Customer: Cascade Outfitters</small></td>
+              <td><div class="carrier"><span class="carrier-mark" style="background:#7c3aed;">FX</span>FedEx</div></td>
+              <td><span class="status s-delivered">Delivered</span></td>
+              <td class="eta">Sep 15, 2026<small>delivered 14:10</small></td>
+              <td class="actions"><button class="kebab">⋯</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="id"><a href="#">SHP-240907-0188</a></td>
+              <td class="loc">Ho Chi Minh City, VN<small>Cat Lai Terminal</small></td>
+              <td class="loc">Rotterdam, NL<small>Port of Rotterdam, Terminal 4</small></td>
+              <td><div class="carrier"><span class="carrier-mark" style="background:#dc2626;">DB</span>DB Schenker</div></td>
+              <td><span class="status s-pending">Pending Pickup</span></td>
+              <td class="eta">Oct 04, 2026<small>in 18 days</small></td>
+              <td class="actions"><button class="kebab">⋯</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <div>Showing <b>1–10</b> of <b>128</b> shipments</div>
+          <div class="pages">
+            <button disabled>‹</button>
+            <button class="current">1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>…</button>
+            <button>13</button>
+            <button>›</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+</body>
+</html>

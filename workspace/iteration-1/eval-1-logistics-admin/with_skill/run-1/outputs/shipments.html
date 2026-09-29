@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shipments · Northbound Ops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600&family=Geist+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Tokens: Soft Bento · Carbon Frost · Gentle Lift ---------- */
+  :root {
+    --surface-primary: #FFFFFF;
+    --surface-secondary: #F7F8FA;
+    --surface-tertiary: #EEF0F2;
+    --surface-inverse: #0A0A0A;
+    --foreground-primary: #1A1A1A;
+    --foreground-secondary: #666666;
+    --foreground-muted: #888888;
+    --foreground-inverse: #FFFFFF;
+    --border-primary: #1A1A1A;
+    --border-subtle: #EEF0F2;
+    --accent-primary: #4A9FD8;
+    --accent-secondary: #0A0A0A;
+    --accent-tertiary: #B3D9F0;
+    --status-success: #5DA876;
+    --status-warning: #D4956A;
+    --status-error: #C96B6B;
+    --status-info: #4A9FD8;
+
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-2xl: 16px;
+    --radius-full: 9999px;
+
+    --shadow-sm: 0px 1px 3px #0000000a;
+    --shadow-md: 0px 2px 4px #00000008, 0px 6px 16px #0000000d;
+
+    --font-headings: "Geist", "Inter", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+    --font-data: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+    --space-6: 24px; --space-8: 32px; --space-10: 40px;
+
+    --sidebar-w: 256px;
+  }
+
+  /* ---------- Base ---------- */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--surface-primary);
+    color: var(--foreground-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+
+  /* ---------- App frame: ground with two zones ---------- */
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+    gap: var(--space-4);
+    min-height: 100vh;
+    padding: var(--space-4);
+  }
+
+  /* ---------- Sidebar (a tile) ---------- */
+  .sidebar {
+    background: var(--surface-secondary);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6) var(--space-4);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: var(--space-4);
+    height: calc(100vh - var(--space-8));
+  }
+  .brand {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: 0 var(--space-3) var(--space-6);
+  }
+  .brand-mark {
+    width: 28px; height: 28px; border-radius: var(--radius-lg);
+    background: var(--surface-inverse); color: var(--foreground-inverse);
+    font-family: var(--font-headings); font-weight: 600; font-size: 13px;
+    display: grid; place-items: center; letter-spacing: 0.02em;
+  }
+  .brand-name { font-family: var(--font-headings); font-weight: 600; font-size: 15px; line-height: 1.2; }
+  .brand-sub { color: var(--foreground-muted); font-size: 12px; line-height: 1.2; margin-top: 2px; }
+
+  .nav { display: flex; flex-direction: column; }
+  .nav-group-label {
+    font-size: 12px; color: var(--foreground-muted);
+    padding: var(--space-4) var(--space-3) var(--space-2);
+  }
+  .nav a {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--space-3) var(--space-3);
+    border-radius: var(--radius-lg);
+    color: var(--foreground-secondary);
+    min-height: 40px;
+  }
+  .nav a:hover { background: var(--surface-tertiary); color: var(--foreground-primary); }
+  .nav a[aria-current="page"] {
+    background: var(--surface-primary);
+    color: var(--foreground-primary);
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+  }
+  .nav-count {
+    font-family: var(--font-data); font-size: 12px;
+    color: var(--foreground-muted);
+  }
+  .nav a[aria-current="page"] .nav-count { color: var(--foreground-secondary); }
+
+  .sidebar-bottom { margin-top: auto; padding-top: var(--space-4); }
+  .user {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-xl);
+    background: var(--surface-primary);
+    box-shadow: var(--shadow-sm);
+  }
+  .avatar {
+    width: 32px; height: 32px; border-radius: var(--radius-full);
+    background: var(--surface-tertiary);
+    color: var(--foreground-secondary);
+    font-size: 12px; font-weight: 600;
+    display: grid; place-items: center;
+  }
+  .user-name { font-weight: 500; line-height: 1.2; }
+  .user-role { font-size: 12px; color: var(--foreground-muted); line-height: 1.2; margin-top: 2px; }
+
+  /* ---------- Main ---------- */
+  .main { display: flex; flex-direction: column; gap: var(--space-6); padding: var(--space-2) var(--space-2) var(--space-6); min-width: 0; }
+
+  .page-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: var(--space-6); padding: var(--space-2) var(--space-2) 0;
+  }
+  .page-title {
+    font-family: var(--font-headings);
+    font-weight: 600; font-size: 28px; line-height: 1.1; letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .page-meta { color: var(--foreground-secondary); margin: var(--space-2) 0 0; }
+  .page-meta .live { color: var(--foreground-muted); }
+  .header-actions { display: flex; gap: var(--space-3); align-items: center; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    padding: 10px var(--space-4);
+    border-radius: var(--radius-full);
+    border: 1px solid transparent;
+    font-weight: 500; line-height: 1.2; white-space: nowrap;
+    min-height: 40px;
+  }
+  .btn-primary { background: var(--accent-primary); color: var(--foreground-inverse); }
+  .btn-primary:hover { filter: brightness(0.95); }
+  .btn-outline { background: var(--surface-primary); border-color: var(--border-subtle); color: var(--foreground-primary); box-shadow: var(--shadow-sm); }
+  .btn-outline:hover { background: var(--surface-tertiary); }
+  .btn-ghost { background: transparent; color: var(--foreground-secondary); padding-inline: var(--space-3); }
+  .btn-ghost:hover { color: var(--foreground-primary); background: var(--surface-tertiary); }
+
+  /* ---------- KPI cluster ---------- */
+  .kpis {
+    display: grid;
+    grid-template-columns: 1.35fr repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+  .kpi {
+    background: var(--surface-secondary);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    display: flex; flex-direction: column; justify-content: space-between;
+    min-height: 148px;
+  }
+  .kpi-label { color: var(--foreground-secondary); font-size: 14px; }
+  .kpi-value {
+    font-family: var(--font-data); font-weight: 600; font-size: 32px;
+    line-height: 1.1; letter-spacing: -0.02em; margin-top: var(--space-1);
+  }
+  .kpi-foot { display: flex; align-items: baseline; gap: var(--space-2); margin-top: var(--space-3); font-size: 12px; color: var(--foreground-muted); }
+  .delta { font-family: var(--font-data); font-weight: 500; color: var(--foreground-primary); }
+  .delta::before { font-family: var(--font-body); font-size: 10px; margin-right: 3px; vertical-align: 1px; }
+  .delta.up::before { content: "\25B2"; color: var(--status-success); }
+  .delta.down::before { content: "\25BC"; color: var(--status-error); }
+  .delta.flat { color: var(--foreground-secondary); }
+
+  .kpi-inverse { background: var(--surface-inverse); color: var(--foreground-inverse); }
+  .kpi-inverse .kpi-label { color: color-mix(in srgb, var(--foreground-inverse) 72%, transparent); }
+  .kpi-inverse .kpi-foot { color: color-mix(in srgb, var(--foreground-inverse) 60%, transparent); }
+  .kpi-inverse .delta { color: var(--foreground-inverse); }
+  .kpi-inverse .kpi-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); }
+  .sparkline { width: 128px; height: 40px; flex: none; margin-top: 2px; }
+  .sparkline path { fill: none; stroke: var(--accent-primary); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .sparkline circle { fill: var(--accent-primary); }
+
+  /* ---------- Shipments tile ---------- */
+  .tile {
+    background: var(--surface-secondary);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    display: flex; flex-direction: column; gap: var(--space-4);
+  }
+
+  .filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+  .search {
+    display: flex; align-items: center; gap: var(--space-2);
+    background: var(--surface-primary);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    padding: 0 var(--space-4);
+    min-height: 40px; flex: 1 1 260px; max-width: 360px;
+  }
+  .search svg { flex: none; color: var(--foreground-muted); }
+  .search input { border: 0; background: transparent; width: 100%; min-width: 0; padding: 0; }
+  .search input::placeholder { color: var(--foreground-muted); }
+  .search input:focus { outline: none; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    background: var(--surface-primary);
+    border: 0; border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    padding: 0 var(--space-3) 0 var(--space-4);
+    min-height: 40px; white-space: nowrap;
+  }
+  .chip .k { color: var(--foreground-muted); }
+  .chip .v { font-weight: 500; }
+  .chip svg { color: var(--foreground-muted); }
+  .chip.is-active .v { color: var(--foreground-primary); }
+  .filters .spacer { flex: 1 1 auto; }
+  .result-count { color: var(--foreground-muted); font-size: 12px; white-space: nowrap; }
+
+  /* Nested table container: inset, rounded.xl, shadow.sm */
+  .table-wrap {
+    background: var(--surface-primary);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  thead th {
+    text-align: left; font-weight: 500; font-size: 12px;
+    color: var(--foreground-secondary);
+    padding: var(--space-3) var(--space-4);
+    height: 44px;
+    border-bottom: 1px solid var(--border-subtle);
+    white-space: nowrap;
+  }
+  thead th button.sort {
+    display: inline-flex; align-items: center; gap: var(--space-1);
+    background: none; border: 0; padding: 0; color: inherit; font: inherit;
+  }
+  thead th .sort svg { color: var(--foreground-muted); }
+  tbody td {
+    padding: 0 var(--space-4);
+    height: 52px;
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: middle;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover td { background: var(--surface-secondary); }
+  tbody tr { cursor: pointer; }
+
+  .col-id { width: 148px; }
+  .col-route { width: auto; }
+  .col-carrier { width: 160px; }
+  .col-status { width: 132px; }
+  .col-eta { width: 168px; }
+
+  .id { font-family: var(--font-data); font-size: 13px; font-weight: 500; }
+  .place { display: block; line-height: 1.25; }
+  .place small { display: block; color: var(--foreground-muted); font-size: 12px; font-weight: 400; }
+  .eta { font-family: var(--font-data); font-size: 13px; line-height: 1.25; display: block; }
+  .eta small { display: block; font-family: var(--font-body); color: var(--foreground-muted); font-size: 12px; }
+  .eta.late small { color: var(--foreground-primary); font-weight: 500; }
+
+  /* Status badges: feedback color only, dot + label */
+  .status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 500; line-height: 1;
+    padding: 6px 10px 6px 8px;
+    border-radius: var(--radius-full);
+    background: var(--surface-tertiary);
+    color: var(--foreground-primary);
+  }
+  .status::before { content: ""; width: 7px; height: 7px; border-radius: var(--radius-full); background: var(--foreground-muted); }
+  .status.transit::before   { background: var(--status-info); }
+  .status.delivered::before { background: var(--status-success); }
+  .status.delayed           { background: color-mix(in srgb, var(--status-error) 14%, var(--surface-primary)); color: color-mix(in srgb, var(--status-error) 70%, var(--foreground-primary)); }
+  .status.delayed::before   { background: var(--status-error); }
+  .status.customs::before   { background: var(--status-warning); }
+  .status.booked::before    { background: var(--foreground-muted); }
+
+  .table-footer {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    color: var(--foreground-muted); font-size: 12px;
+  }
+  .pager { display: flex; align-items: center; gap: var(--space-1); }
+  .pager button {
+    min-width: 32px; height: 32px; padding: 0 var(--space-2);
+    border: 0; border-radius: var(--radius-lg); background: transparent;
+    color: var(--foreground-secondary); font-family: var(--font-data); font-size: 12px;
+  }
+  .pager button:hover { background: var(--surface-tertiary); color: var(--foreground-primary); }
+  .pager button[aria-current="page"] { background: var(--surface-tertiary); color: var(--foreground-primary); font-weight: 500; }
+  .pager-gap { padding: 0 var(--space-1); }
+  .pager button:disabled { color: var(--foreground-muted); opacity: .5; cursor: default; }
+
+  /* Empty state lives in the same container so the layout does not jump */
+  .empty {
+    display: none; padding: var(--space-10) var(--space-6); text-align: center;
+    color: var(--foreground-secondary);
+  }
+  .empty strong { display: block; color: var(--foreground-primary); font-weight: 500; margin-bottom: var(--space-1); }
+  .table-wrap.is-empty table, .table-wrap.is-empty .table-footer { display: none; }
+  .table-wrap.is-empty .empty { display: block; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1100px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .col-carrier { width: 140px; }
+  }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; padding: var(--space-3); }
+    .sidebar { position: static; height: auto; padding: var(--space-4); }
+    .brand { padding-bottom: var(--space-3); }
+    .nav { flex-direction: row; flex-wrap: wrap; gap: var(--space-1); }
+    .nav-group-label { display: none; }
+    .nav a { min-height: 36px; padding: var(--space-2) var(--space-3); gap: var(--space-2); }
+    .sidebar-bottom { display: none; }
+    .main { padding: 0; }
+    .page-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+    .header-actions .btn-outline { display: none; }
+    .tile, .kpi { padding: var(--space-4); }
+    .kpi { min-height: 120px; }
+    .sparkline { width: 96px; }
+    .filters .spacer, .result-count { display: none; }
+
+    /* Table becomes stacked cards */
+    table, thead, tbody, tr, td { display: block; }
+    thead { display: none; }
+    table { table-layout: auto; }
+    tbody tr { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-subtle); }
+    tbody tr:last-child { border-bottom: 0; }
+    tbody td { height: auto; padding: var(--space-1) 0; border: 0; white-space: normal; display: flex; justify-content: space-between; gap: var(--space-4); }
+    tbody td::before { content: attr(data-label); color: var(--foreground-muted); font-size: 12px; flex: none; width: 88px; padding-top: 2px; }
+    tbody td.td-id::before { display: none; }
+    tbody td.td-id { padding-bottom: var(--space-2); }
+    .place, .eta { text-align: right; }
+    .table-footer { flex-direction: column; align-items: flex-start; gap: var(--space-2); }
+  }
+  @media (max-width: 480px) {
+    .kpis { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ Sidebar ============ -->
+  <aside class="sidebar" aria-label="Primary">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">NB</div>
+      <div>
+        <div class="brand-name">Northbound Ops</div>
+        <div class="brand-sub">Amsterdam hub · EU</div>
+      </div>
+    </div>
+
+    <nav class="nav" aria-label="Sections">
+      <a href="#">Overview</a>
+      <a href="#" aria-current="page"><span>Shipments</span><span class="nav-count">412</span></a>
+      <a href="#"><span>Exceptions</span><span class="nav-count">17</span></a>
+      <a href="#">Carriers</a>
+      <a href="#">Warehouses</a>
+      <a href="#">Customers</a>
+      <a href="#">Invoices</a>
+      <div class="nav-group-label">Workspace</div>
+      <a href="#">Reports</a>
+      <a href="#">Settings</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="user">
+        <div class="avatar" aria-hidden="true">AF</div>
+        <div>
+          <div class="user-name">Aaron Feldman</div>
+          <div class="user-role">Operations lead</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ Main ============ -->
+  <main class="main">
+
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Shipments</h1>
+        <p class="page-meta">412 active across 9 carriers <span class="live">· updated 2 min ago</span></p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline" type="button">Export CSV</button>
+        <button class="btn btn-primary" type="button">New shipment</button>
+      </div>
+    </header>
+
+    <!-- KPI cluster: leading tile is the inverse block -->
+    <section class="kpis" aria-label="Key metrics">
+      <div class="kpi kpi-inverse">
+        <div class="kpi-head">
+          <div>
+            <div class="kpi-label">In transit</div>
+            <div class="kpi-value">286</div>
+          </div>
+          <svg class="sparkline" viewBox="0 0 128 40" aria-hidden="true">
+            <path d="M2 30 L14 27 L26 29 L38 22 L50 24 L62 18 L74 20 L86 14 L98 16 L110 10 L124 8"/>
+            <circle cx="124" cy="8" r="3"/>
+          </svg>
+        </div>
+        <div class="kpi-foot"><span class="delta up">+38</span><span>vs. last 7 days</span></div>
+      </div>
+
+      <div class="kpi">
+        <div>
+          <div class="kpi-label">On-time delivery</div>
+          <div class="kpi-value">94.2%</div>
+        </div>
+        <div class="kpi-foot"><span class="delta up">+1.4 pt</span><span>30-day rolling</span></div>
+      </div>
+
+      <div class="kpi">
+        <div>
+          <div class="kpi-label">Delayed</div>
+          <div class="kpi-value">17</div>
+        </div>
+        <div class="kpi-foot"><span class="delta down">+5</span><span>since yesterday</span></div>
+      </div>
+
+      <div class="kpi">
+        <div>
+          <div class="kpi-label">Avg. transit time</div>
+          <div class="kpi-value">3.8 d</div>
+        </div>
+        <div class="kpi-foot"><span class="delta flat">±0.0</span><span>vs. last month</span></div>
+      </div>
+    </section>
+
+    <!-- Shipments tile: filters + nested table -->
+    <section class="tile" aria-labelledby="table-title">
+      <h2 id="table-title" hidden>All shipments</h2>
+
+      <div class="filters" role="group" aria-label="Filters">
+        <label class="search">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+          <input type="search" placeholder="Search by ID, reference, city or carrier" aria-label="Search shipments">
+        </label>
+
+        <button class="chip is-active" type="button" aria-haspopup="listbox">
+          <span class="k">Status</span><span class="v">Active</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m3.5 5.5 3.5 3.5 3.5-3.5"/></svg>
+        </button>
+        <button class="chip" type="button" aria-haspopup="listbox">
+          <span class="k">Carrier</span><span class="v">All</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m3.5 5.5 3.5 3.5 3.5-3.5"/></svg>
+        </button>
+        <button class="chip" type="button" aria-haspopup="listbox">
+          <span class="k">Origin</span><span class="v">All</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m3.5 5.5 3.5 3.5 3.5-3.5"/></svg>
+        </button>
+        <button class="chip" type="button" aria-haspopup="dialog">
+          <span class="k">ETA</span><span class="v">Next 14 days</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m3.5 5.5 3.5 3.5 3.5-3.5"/></svg>
+        </button>
+        <button class="btn btn-ghost" type="button">Clear</button>
+
+        <span class="spacer"></span>
+        <span class="result-count">Showing 1–10 of 412</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <colgroup>
+            <col class="col-id"><col class="col-route"><col class="col-route"><col class="col-carrier"><col class="col-status"><col class="col-eta">
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col">Shipment</th>
+              <th scope="col">Origin</th>
+              <th scope="col">Destination</th>
+              <th scope="col">Carrier</th>
+              <th scope="col">Status</th>
+              <th scope="col" aria-sort="ascending">
+                <button class="sort" type="button">ETA
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 2v8M3 7l3 3 3-3"/></svg>
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-id" data-label="Shipment"><span class="id">SHP-26-08813</span></td>
+              <td data-label="Origin"><span class="place">Rotterdam<small>Netherlands</small></span></td>
+              <td data-label="Destination"><span class="place">Hamburg<small>Germany</small></span></td>
+              <td data-label="Carrier">DB Schenker</td>
+              <td data-label="Status"><span class="status delayed">Delayed</span></td>
+              <td data-label="ETA"><span class="eta late">16 Sep, 14:00<small>Overdue by 6 h</small></span></td>
+            </tr>
+            <tr>
+              <td class="td-id" data-label="Shipment"><span class="id">SHP-26-08821</span></td>
+              <td data-label="Origin"><span class="place">Antwerp<small>Belgium</small></span></td>
+              <td data-label="Destination"><span class="place">Lyon<small>France</small></span></td>
+              <td data-label="Carrier">DSV Road</td>
+              <td data-label="Status"><span class="status transit">In transit</span></td>
+              <td data-label="ETA"><span class="eta">17 Sep, 09:30<small>Tomorrow</small></span></td>
+            </tr>
+            <tr>
+              <td class="td-id" data-label="Shipment"><span class="id">SHP-26-08794</span></td>
+              <td data-label="Origin"><span class="place">Gdańsk<small>Poland</small></span></td>
+              <td data-label="Destination"><span class="place">Amsterdam<small>Netherlands</small></span></td>
+              <td data-label="Carrier">Maersk</td>
+              <td data-label="Status"><span class="status customs">At customs</span></td>
+              <td data-label="ETA"><span class="eta">18 Sep, 16:00<small>In 2 days</small></span></td>
+            </tr>
+            <tr>
+              <td class="td-id" data-label="Shipment"><span class="id">SHP-26-08830</span></td>
+              <td data-label="Origin"><span class="place">Amsterdam<small>Netherlands</small></span></td>
+              <td data-label="Destination"><span class="place">Copenhagen<small>Denmark</small></span></td>
+              <td data-label="Carrier">DHL Freight</td>
+              <td data-label="Status"><span class="status transit">In transit</span></td>
+              <td data-label="ETA"><span class="eta">18 Sep, 11:00<small>In 2 days</small></span></td>
+            </tr>
+            <tr>
+              <td class="td-id" data-label="Shipment"><span class="id">SHP-26-08776</span></td>
+              <td data-label="Origin"><span class="place">Valencia<small>Spain</small></span></td>
+              <td data-label="Destination"><span class="place">Milan<small>Italy</small></span></td>
+              <td data-label="Carrier">Kuehne+Nagel</td>
+              <td data-label="Status"><span class="status delivered">Delivered</span></td>
+              <td data-label="ETA"><span class="eta">15 Sep, 17:20<small>Signed by M. Ricci</small></span></td>
+            </tr>
+            <tr>
+              <td class="td-id" data-label="Shipment"><span class="id">SHP-26-08842</span></td>
+              <td data-label="Origin"><span class="place">Duisburg<small>Germany</small></span></td>
+              <td data-label="Destination"><span class="place">Vienna<small>Austria</small></span></td>
+              <td data-label="Carrier">Rhenus</td>
+              <td data-label="Status"><span class="status booked">Booked</span></td>
+              <td data-label="ETA"><span class="eta">19 Sep, 08:00<small>In 3 days</small></span></td>
+            </tr>
+            <tr>
+              <td class="td-id" data-label="Shipment"><span class="id">SHP-26-08805</span></td>
+              <td data-label="Origin"><span class="place">Le Havre<small>France</small></span></td>
+              <td data-label="Destination"><span class="place">Dublin<small>Ireland</small></span></td>
+              <td data-label="Carrier">CMA CGM</td>
+              <td data-label="Status"><span class="status transit">In transit</span></td>
+              <td data-label="ETA"><span class="eta">20 Sep, 06:00<small>In 4 days</small></span></td>
+            </tr>
+            <tr>
+              <td class="td-id" data-label="Shipment"><span class="id">SHP-26-08788</span></td>
+              <td data-label="Origin"><span class="place">Gothenburg<small>Sweden</small></span></td>
+              <td data-label="Destination"><span class="place">Rotterdam<small>Netherlands</small></span></td>
+              <td data-label="Carrier">DFDS</td>
+              <td data-label="Status"><span class="status delayed">Delayed</span></td>
+              <td data-label="ETA"><span class="eta late">16 Sep, 22:00<small>Rebooked, +1 day</small></span></td>
+            </tr>
+            <tr>
+              <td class="td-id" data-label="Shipment"><span class="id">SHP-26-08851</span></td>
+              <td data-label="Origin"><span class="place">Prague<small>Czechia</small></span></td>
+              <td data-label="Destination"><span class="place">Brussels<small>Belgium</small></span></td>
+              <td data-label="Carrier">DSV Road</td>
+              <td data-label="Status"><span class="status transit">In transit</span></td>
+              <td data-label="ETA"><span class="eta">21 Sep, 13:30<small>In 5 days</small></span></td>
+            </tr>
+            <tr>
+              <td class="td-id" data-label="Shipment"><span class="id">SHP-26-08769</span></td>
+              <td data-label="Origin"><span class="place">Lisbon<small>Portugal</small></span></td>
+              <td data-label="Destination"><span class="place">Munich<small>Germany</small></span></td>
+              <td data-label="Carrier">Kuehne+Nagel</td>
+              <td data-label="Status"><span class="status delivered">Delivered</span></td>
+              <td data-label="ETA"><span class="eta">15 Sep, 10:45<small>Signed by dock 4</small></span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="table-footer">
+          <span>10 per page</span>
+          <div class="pager" aria-label="Pagination">
+            <button type="button" disabled aria-label="Previous page">‹</button>
+            <button type="button" aria-current="page">1</button>
+            <button type="button">2</button>
+            <button type="button">3</button>
+            <span class="pager-gap">…</span>
+            <button type="button">42</button>
+            <button type="button" aria-label="Next page">›</button>
+          </div>
+        </div>
+
+        <div class="empty" role="status">
+          <strong>No shipments match these filters</strong>
+          Try widening the ETA window or clearing the carrier filter.
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+</body>
+</html>

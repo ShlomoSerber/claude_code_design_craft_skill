@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-2-flutter-meditation",
+  "prompt": "Write a Flutter screen (single Dart file, no packages beyond material) for the home tab of a meditation app: a greeting, today's recommended session as a hero element, a horizontal row of quick sessions (5, 10, 20 min), and a list of recent sessions. Include a bottom tab bar. Save it as home_screen.dart.",
+  "assertions": [
+    "Defines a token layer (a ThemeExtension subclass or a class/abstract class of static color and radius constants) with at least 8 fields",
+    "Uses at most 2 Color(0x...) hex literals outside the token layer",
+    "Bottom navigation has between 3 and 5 items",
+    "Interactive elements have a minimum height or size of 44 (explicit or via Material defaults not overridden below 44)",
+    "Body text style is 16 or larger",
+    "Uses only package:flutter/material.dart imports"
+  ]
+}

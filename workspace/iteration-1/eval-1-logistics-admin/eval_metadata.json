@@ -1,0 +1,17 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-1-logistics-admin",
+  "prompt": "I need a mockup of the main screen of an internal admin panel for a logistics company: a sidebar with navigation, a page called 'Shipments' with 4 KPI metrics at the top, a filter bar, and a table of shipments (id, origin, destination, carrier, status, ETA). Make it a single HTML file with inline CSS. Save it as shipments.html.",
+  "assertions": [
+    "Defines at least 8 CSS custom properties on :root (tokens defined once)",
+    "Uses at most 3 raw hex/rgb color literals outside the :root block",
+    "Contains no lorem ipsum or 'Feature 1'-style placeholder copy",
+    "Base body font-size is 14px or larger",
+    "Declares a font-family stack or loads a webfont (Google Fonts link or @font-face)",
+    "Uses a layered box-shadow (2+ layers) wherever a shadow is declared, or declares no shadows",
+    "Renders exactly 4 KPI metric blocks",
+    "Table header includes all six requested columns: id, origin, destination, carrier, status, ETA",
+    "Status colors (success/warning/error) appear only in the status column and nowhere decorative",
+    "Sidebar marks exactly one active navigation item"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "eval_id": 0,
+  "eval_name": "eval-0-finance-landing",
+  "prompt": "Build me a landing page for 'Ledgerly', a personal finance app that automatically categorizes spending and shows you where your money goes each month. Single self-contained HTML file with inline CSS, no build step. It should look premium, not like a template. Save it as index.html.",
+  "assertions": [
+    "Defines at least 8 CSS custom properties on :root (tokens defined once)",
+    "Uses at most 3 raw hex/rgb color literals outside the :root block",
+    "Contains no lorem ipsum or 'Feature 1'-style placeholder copy",
+    "Base body font-size is 14px or larger",
+    "Declares a font-family stack or loads a webfont (Google Fonts link or @font-face)",
+    "Uses a layered box-shadow (2+ layers) wherever a shadow is declared, or declares no shadows",
+    "Hero section has exactly one primary call-to-action button",
+    "Page has at least 4 distinct sections with alternating visual treatment (at least one inverse/dark section)"
+  ]
+}

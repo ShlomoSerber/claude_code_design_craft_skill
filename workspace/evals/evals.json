@@ -1,0 +1,53 @@
+{
+  "skill_name": "design-craft",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Build me a landing page for 'Ledgerly', a personal finance app that automatically categorizes spending and shows you where your money goes each month. Single self-contained HTML file with inline CSS, no build step. It should look premium, not like a template. Save it as index.html.",
+      "expected_output": "A single index.html with a coherent visual identity: one clear archetype, semantic color tokens defined once as CSS variables, a strong hero with one CTA, alternating section rhythm, no card-wrapping of everything, plausible copy.",
+      "files": [],
+      "assertions": [
+        "Defines at least 8 CSS custom properties on :root (tokens defined once)",
+        "Uses at most 3 raw hex/rgb color literals outside the :root block",
+        "Contains no lorem ipsum or 'Feature 1'-style placeholder copy",
+        "Base body font-size is 14px or larger",
+        "Declares a font-family stack or loads a webfont (Google Fonts link or @font-face)",
+        "Uses a layered box-shadow (2+ layers) wherever a shadow is declared, or declares no shadows",
+        "Hero section has exactly one primary call-to-action button",
+        "Page has at least 4 distinct sections with alternating visual treatment (at least one inverse/dark section)"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "I need a mockup of the main screen of an internal admin panel for a logistics company: a sidebar with navigation, a page called 'Shipments' with 4 KPI metrics at the top, a filter bar, and a table of shipments (id, origin, destination, carrier, status, ETA). Make it a single HTML file with inline CSS. Save it as shipments.html.",
+      "expected_output": "A single shipments.html that reads as functional product UI: one dominant region (the table), one primary action, metric cards with clear label/value hierarchy, consistent spacing scale, status colors used only for status, sidebar with a clear active item, tokens defined once.",
+      "files": [],
+      "assertions": [
+        "Defines at least 8 CSS custom properties on :root (tokens defined once)",
+        "Uses at most 3 raw hex/rgb color literals outside the :root block",
+        "Contains no lorem ipsum or 'Feature 1'-style placeholder copy",
+        "Base body font-size is 14px or larger",
+        "Declares a font-family stack or loads a webfont (Google Fonts link or @font-face)",
+        "Uses a layered box-shadow (2+ layers) wherever a shadow is declared, or declares no shadows",
+        "Renders exactly 4 KPI metric blocks",
+        "Table header includes all six requested columns: id, origin, destination, carrier, status, ETA",
+        "Status colors (success/warning/error) appear only in the status column and nowhere decorative",
+        "Sidebar marks exactly one active navigation item"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Write a Flutter screen (single Dart file, no packages beyond material) for the home tab of a meditation app: a greeting, today's recommended session as a hero element, a horizontal row of quick sessions (5, 10, 20 min), and a list of recent sessions. Include a bottom tab bar. Save it as home_screen.dart.",
+      "expected_output": "A home_screen.dart with a theme/token layer (colors, radii, text styles defined once, e.g., a ThemeExtension or constants class), one dominant hero, 16px+ body text, 44px+ touch targets, a bottom bar with 3-5 items, no per-item hardcoded hex values in widgets.",
+      "files": [],
+      "assertions": [
+        "Defines a token layer (a ThemeExtension subclass or a class/abstract class of static color and radius constants) with at least 8 fields",
+        "Uses at most 2 Color(0x...) hex literals outside the token layer",
+        "Bottom navigation has between 3 and 5 items",
+        "Interactive elements have a minimum height or size of 44 (explicit or via Material defaults not overridden below 44)",
+        "Body text style is 16 or larger",
+        "Uses only package:flutter/material.dart imports"
+      ]
+    }
+  ]
+}

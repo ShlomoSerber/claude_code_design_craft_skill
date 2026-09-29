@@ -1,0 +1,40 @@
+{
+  "expectations": [
+    {
+      "text": "Defines a token layer (a ThemeExtension subclass or a class/abstract class of static color and radius constants) with at least 8 fields",
+      "passed": true,
+      "evidence": "token class: StillTokens, fields=16, ThemeExtension=True"
+    },
+    {
+      "text": "Uses at most 2 Color(0x...) hex literals outside the token layer",
+      "passed": true,
+      "evidence": "0 hex Color literals outside token class"
+    },
+    {
+      "text": "Bottom navigation has between 3 and 5 items",
+      "passed": true,
+      "evidence": "4 nav items"
+    },
+    {
+      "text": "Interactive elements have a minimum height or size of 44 (explicit or via Material defaults not overridden below 44)",
+      "passed": true,
+      "evidence": "heights below 44 found: [] (may be non-interactive)"
+    },
+    {
+      "text": "Body text style is 16 or larger",
+      "passed": true,
+      "evidence": "fontSizes: [10.0, 13.0, 14.0, 15.0, 16.0, 18.0, 22.0, 40.0] (need 16 present, none below 10)"
+    },
+    {
+      "text": "Uses only package:flutter/material.dart imports",
+      "passed": true,
+      "evidence": "['dart:ui', 'package:flutter/material.dart']"
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  }
+}

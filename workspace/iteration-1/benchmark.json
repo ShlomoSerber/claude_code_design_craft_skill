@@ -1,0 +1,413 @@
+{
+  "metadata": {
+    "skill_name": "design-craft",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-09-16T20:49:48Z",
+    "evals_run": [
+      0,
+      1,
+      2
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 245.0,
+        "tokens": 77015,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Defines at least 8 CSS custom properties on :root (tokens defined once)",
+          "passed": true,
+          "evidence": "45 vars on :root"
+        },
+        {
+          "text": "Uses at most 3 raw hex/rgb color literals outside the :root block",
+          "passed": true,
+          "evidence": "2 literals outside :root: ['#FFA726', 'rgba(255,255,255,0.4)']"
+        },
+        {
+          "text": "Contains no lorem ipsum or 'Feature 1'-style placeholder copy",
+          "passed": true,
+          "evidence": "none found"
+        },
+        {
+          "text": "Base body font-size is 14px or larger",
+          "passed": true,
+          "evidence": "body {\n    margin: 0;\n    background: var(--surface-primary);\n    color: var(--foreground-primary);\n    font-family: var(--font-body);\n    font-size: 16px"
+        },
+        {
+          "text": "Declares a font-family stack or loads a webfont (Google Fonts link or @font-face)",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Uses a layered box-shadow (2+ layers) wherever a shadow is declared, or declares no shadows",
+          "passed": true,
+          "evidence": "3 shadow decls; single-layer: []"
+        },
+        {
+          "text": "Hero section has exactly one primary call-to-action button",
+          "passed": true,
+          "evidence": "1 primary CTAs in hero region"
+        },
+        {
+          "text": "Page has at least 4 distinct sections with alternating visual treatment (at least one inverse/dark section)",
+          "passed": true,
+          "evidence": "6 sections, inverse/dark class present: True"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 10,
+        "failed": 0,
+        "total": 10,
+        "time_seconds": 252.3,
+        "tokens": 81188,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Defines at least 8 CSS custom properties on :root (tokens defined once)",
+          "passed": true,
+          "evidence": "34 vars on :root"
+        },
+        {
+          "text": "Uses at most 3 raw hex/rgb color literals outside the :root block",
+          "passed": true,
+          "evidence": "0 literals outside :root: []"
+        },
+        {
+          "text": "Contains no lorem ipsum or 'Feature 1'-style placeholder copy",
+          "passed": true,
+          "evidence": "none found"
+        },
+        {
+          "text": "Base body font-size is 14px or larger",
+          "passed": true,
+          "evidence": "body {\n    background: var(--surface-primary);\n    color: var(--foreground-primary);\n    font-family: var(--font-body);\n    font-size: 14px"
+        },
+        {
+          "text": "Declares a font-family stack or loads a webfont (Google Fonts link or @font-face)",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Uses a layered box-shadow (2+ layers) wherever a shadow is declared, or declares no shadows",
+          "passed": true,
+          "evidence": "6 shadow decls; single-layer: []"
+        },
+        {
+          "text": "Renders exactly 4 KPI metric blocks",
+          "passed": true,
+          "evidence": "4 elements with kpi/metric/stat class (cards may nest)"
+        },
+        {
+          "text": "Table header includes all six requested columns: id, origin, destination, carrier, status, ETA",
+          "passed": true,
+          "evidence": "\n            <tr>\n              <th scope=\"col\">shipment origin destination carrier status \n                <button clas"
+        },
+        {
+          "text": "Status colors (success/warning/error) appear only in the status column and nowhere decorative",
+          "passed": true,
+          "evidence": "manual check; status var uses in css: 7"
+        },
+        {
+          "text": "Sidebar marks exactly one active navigation item",
+          "passed": true,
+          "evidence": "1 .active elements"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 400.3,
+        "tokens": 88491,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Defines a token layer (a ThemeExtension subclass or a class/abstract class of static color and radius constants) with at least 8 fields",
+          "passed": true,
+          "evidence": "token class: StillTokens, fields=16, ThemeExtension=True"
+        },
+        {
+          "text": "Uses at most 2 Color(0x...) hex literals outside the token layer",
+          "passed": true,
+          "evidence": "0 hex Color literals outside token class"
+        },
+        {
+          "text": "Bottom navigation has between 3 and 5 items",
+          "passed": true,
+          "evidence": "4 nav items"
+        },
+        {
+          "text": "Interactive elements have a minimum height or size of 44 (explicit or via Material defaults not overridden below 44)",
+          "passed": true,
+          "evidence": "heights below 44 found: [] (may be non-interactive)"
+        },
+        {
+          "text": "Body text style is 16 or larger",
+          "passed": true,
+          "evidence": "fontSizes: [10.0, 13.0, 14.0, 15.0, 16.0, 18.0, 22.0, 40.0] (need 16 present, none below 10)"
+        },
+        {
+          "text": "Uses only package:flutter/material.dart imports",
+          "passed": true,
+          "evidence": "['dart:ui', 'package:flutter/material.dart']"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.625,
+        "passed": 5,
+        "failed": 3,
+        "total": 8,
+        "time_seconds": 175.3,
+        "tokens": 47619,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Defines at least 8 CSS custom properties on :root (tokens defined once)",
+          "passed": true,
+          "evidence": "25 vars on :root"
+        },
+        {
+          "text": "Uses at most 3 raw hex/rgb color literals outside the :root block",
+          "passed": false,
+          "evidence": "26 literals outside :root: ['rgba(255,255,255,.15)', 'rgba(23,21,15,.6)', '#000', 'rgba(23,21,15,.7)', 'rgba(23,21,15,.04)', 'rgba(31,92,69,.16)']"
+        },
+        {
+          "text": "Contains no lorem ipsum or 'Feature 1'-style placeholder copy",
+          "passed": true,
+          "evidence": "none found"
+        },
+        {
+          "text": "Base body font-size is 14px or larger",
+          "passed": true,
+          "evidence": "body {\n    font-family: var(--sans);\n    background: var(--paper);\n    color: var(--ink);\n    line-height: 1.55;\n    font-size: 16px"
+        },
+        {
+          "text": "Declares a font-family stack or loads a webfont (Google Fonts link or @font-face)",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Uses a layered box-shadow (2+ layers) wherever a shadow is declared, or declares no shadows",
+          "passed": false,
+          "evidence": "6 shadow decls; single-layer: ['0 12px 26px -10px rgba(23,21,15,.7)']"
+        },
+        {
+          "text": "Hero section has exactly one primary call-to-action button",
+          "passed": true,
+          "evidence": "1 primary CTAs in hero region"
+        },
+        {
+          "text": "Page has at least 4 distinct sections with alternating visual treatment (at least one inverse/dark section)",
+          "passed": false,
+          "evidence": "6 sections, inverse/dark class present: False"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.9,
+        "passed": 9,
+        "failed": 1,
+        "total": 10,
+        "time_seconds": 128.5,
+        "tokens": 44274,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Defines at least 8 CSS custom properties on :root (tokens defined once)",
+          "passed": true,
+          "evidence": "23 vars on :root"
+        },
+        {
+          "text": "Uses at most 3 raw hex/rgb color literals outside the :root block",
+          "passed": false,
+          "evidence": "36 literals outside :root: ['rgba(255,255,255,0.06)', '#fff', '#fff', '#64748b', 'rgba(255,255,255,0.05)', '#e2e8f0']"
+        },
+        {
+          "text": "Contains no lorem ipsum or 'Feature 1'-style placeholder copy",
+          "passed": true,
+          "evidence": "none found"
+        },
+        {
+          "text": "Base body font-size is 14px or larger",
+          "passed": true,
+          "evidence": "body {\n    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;\n    font-size: 14px"
+        },
+        {
+          "text": "Declares a font-family stack or loads a webfont (Google Fonts link or @font-face)",
+          "passed": true,
+          "evidence": "ok"
+        },
+        {
+          "text": "Uses a layered box-shadow (2+ layers) wherever a shadow is declared, or declares no shadows",
+          "passed": true,
+          "evidence": "2 shadow decls; single-layer: []"
+        },
+        {
+          "text": "Renders exactly 4 KPI metric blocks",
+          "passed": true,
+          "evidence": "4 elements with kpi/metric/stat class (cards may nest)"
+        },
+        {
+          "text": "Table header includes all six requested columns: id, origin, destination, carrier, status, ETA",
+          "passed": true,
+          "evidence": "\n            <tr>\n              <th style=\"width:40px;\"><input type=\"checkbox\" aria-label=\"select all\"> shipment id orig"
+        },
+        {
+          "text": "Status colors (success/warning/error) appear only in the status column and nowhere decorative",
+          "passed": true,
+          "evidence": "manual check; status var uses in css: 0"
+        },
+        {
+          "text": "Sidebar marks exactly one active navigation item",
+          "passed": true,
+          "evidence": "1 .active elements"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.3333333333333333,
+        "passed": 2,
+        "failed": 4,
+        "total": 6,
+        "time_seconds": 62.0,
+        "tokens": 37224,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Defines a token layer (a ThemeExtension subclass or a class/abstract class of static color and radius constants) with at least 8 fields",
+          "passed": false,
+          "evidence": "token class: None, fields=0, ThemeExtension=False"
+        },
+        {
+          "text": "Uses at most 2 Color(0x...) hex literals outside the token layer",
+          "passed": false,
+          "evidence": "6 hex Color literals outside token class"
+        },
+        {
+          "text": "Bottom navigation has between 3 and 5 items",
+          "passed": true,
+          "evidence": "4 nav items"
+        },
+        {
+          "text": "Interactive elements have a minimum height or size of 44 (explicit or via Material defaults not overridden below 44)",
+          "passed": false,
+          "evidence": "heights below 44 found: [24.0, 28.0, 28.0, 32.0, 36.0] (may be non-interactive)"
+        },
+        {
+          "text": "Body text style is 16 or larger",
+          "passed": false,
+          "evidence": "fontSizes: [11.0, 12.5, 13.0, 14.0, 15.0, 18.0, 24.0, 26.0] (need 16 present, none below 10)"
+        },
+        {
+          "text": "Uses only package:flutter/material.dart imports",
+          "passed": true,
+          "evidence": "['package:flutter/material.dart']"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 299.2,
+        "stddev": 87.6312,
+        "min": 245.0,
+        "max": 400.3
+      },
+      "tokens": {
+        "mean": 82231.3333,
+        "stddev": 5808.7049,
+        "min": 77015,
+        "max": 88491
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.6194,
+        "stddev": 0.2834,
+        "min": 0.3333,
+        "max": 0.9
+      },
+      "time_seconds": {
+        "mean": 121.9333,
+        "stddev": 56.9347,
+        "min": 62.0,
+        "max": 175.3
+      },
+      "tokens": {
+        "mean": 43039.0,
+        "stddev": 5306.4041,
+        "min": 37224,
+        "max": 47619
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.38",
+      "time_seconds": "+177.3",
+      "tokens": "+39192"
+    }
+  },
+  "notes": []
+}

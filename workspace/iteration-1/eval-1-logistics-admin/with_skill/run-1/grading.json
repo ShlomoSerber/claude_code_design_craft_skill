@@ -1,0 +1,60 @@
+{
+  "expectations": [
+    {
+      "text": "Defines at least 8 CSS custom properties on :root (tokens defined once)",
+      "passed": true,
+      "evidence": "34 vars on :root"
+    },
+    {
+      "text": "Uses at most 3 raw hex/rgb color literals outside the :root block",
+      "passed": true,
+      "evidence": "0 literals outside :root: []"
+    },
+    {
+      "text": "Contains no lorem ipsum or 'Feature 1'-style placeholder copy",
+      "passed": true,
+      "evidence": "none found"
+    },
+    {
+      "text": "Base body font-size is 14px or larger",
+      "passed": true,
+      "evidence": "body {\n    background: var(--surface-primary);\n    color: var(--foreground-primary);\n    font-family: var(--font-body);\n    font-size: 14px"
+    },
+    {
+      "text": "Declares a font-family stack or loads a webfont (Google Fonts link or @font-face)",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "Uses a layered box-shadow (2+ layers) wherever a shadow is declared, or declares no shadows",
+      "passed": true,
+      "evidence": "6 shadow decls; single-layer: []"
+    },
+    {
+      "text": "Renders exactly 4 KPI metric blocks",
+      "passed": true,
+      "evidence": "4 elements with kpi/metric/stat class (cards may nest)"
+    },
+    {
+      "text": "Table header includes all six requested columns: id, origin, destination, carrier, status, ETA",
+      "passed": true,
+      "evidence": "\n            <tr>\n              <th scope=\"col\">shipment origin destination carrier status \n                <button clas"
+    },
+    {
+      "text": "Status colors (success/warning/error) appear only in the status column and nowhere decorative",
+      "passed": true,
+      "evidence": "manual check; status var uses in css: 7"
+    },
+    {
+      "text": "Sidebar marks exactly one active navigation item",
+      "passed": true,
+      "evidence": "1 .active elements"
+    }
+  ],
+  "summary": {
+    "passed": 10,
+    "failed": 0,
+    "total": 10,
+    "pass_rate": 1.0
+  }
+}
